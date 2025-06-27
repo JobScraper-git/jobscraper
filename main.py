@@ -104,7 +104,7 @@ def main():
                 save_posted_link(job['link'])
                 time.sleep(2)
         print("⏳ Sleeping")
-        time.sleep(600)
+        time.sleep(5)
 
 
 # Flask app to keep Replit alive
