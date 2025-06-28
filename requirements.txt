@@ -2,5 +2,3 @@ requests
 beautifulsoup4
 feedparser
 flask
-html
-re
