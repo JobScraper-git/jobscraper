@@ -36,6 +36,8 @@ def load_posted_links():
 def save_posted_link(link):
     with open(POSTED_LINKS_FILE, 'a') as f:
         f.write(link + '\n')
+    print(f"💾 Saved link: {link}")
+
 
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
@@ -161,7 +163,11 @@ def main():
     while True:
         jobs = get_google_alerts()
         for job in jobs:
-            real_link = job['link'].split('url=')[-1].split('&')[0]
+            if 'url=' in job['link']:
+                real_link = job['link'].split('url=')[-1].split('&')[0]
+            else:
+                real_link = job['link']
+
 
             if real_link not in posted_links:
                 post_to_telegram(job)
