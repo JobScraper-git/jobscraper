@@ -157,14 +157,15 @@ def post_to_telegram(job):
 
 
 def main():
+    real_link = job['link'].split('url=')[-1].split('&')[0]
     posted_links = load_posted_links()
     while True:
         jobs = get_google_alerts()
         for job in jobs:
-            if job['link'] not in posted_links:
+            if real_link not in posted_links:
                 post_to_telegram(job)
-                posted_links.add(job['link'])
-                save_posted_link(job['link'])
+                posted_links.add(real_link)
+                save_posted_link(real_link)
                 time.sleep(2)
         print("⏳ Sleeping")
         time.sleep(1)
