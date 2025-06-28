@@ -133,6 +133,7 @@ def post_to_telegram(job):
 💼 *Title:* {clean_title}
 🗂️ *Summary:* Tap below to view full details
 🌍 *Source:* {domain}
+{tag_line}
 🔗 👉 [View and Apply Now]({job['link']})
 ✅ Stay tuned for more job updates!
 """
