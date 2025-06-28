@@ -11,6 +11,20 @@ from urllib.parse import urlparse
 
 POSTED_LINKS_FILE = 'posted_links.txt'
 
+KEYWORD_TAGS = {
+    'python': '🐍 Python',
+    'intern': '🎓 Internship',
+    'remote': '🏡 Remote',
+    'fresher': '🧑‍🎓 Fresher',
+    'developer': '💻 Developer',
+    'engineer': '🛠️ Engineer',
+    'full stack': '🧩 Full Stack',
+    'data': '📊 Data',
+    'ai': '🤖 AI',
+    'ml': '🧠 ML',
+    'cloud': '☁️ Cloud'
+}
+
 
 def load_posted_links():
     if not os.path.exists(POSTED_LINKS_FILE):
@@ -104,6 +118,15 @@ def post_to_telegram(job):
     
     source_link = job['link'].split('url=')[-1].split('&')[0]
     domain = source_link.split('/')[2].replace('www.', '')
+
+    tags = []
+    title_lower = clean_title.lower()
+    
+    for keyword, emoji in KEYWORD_TAGS.items():
+        if keyword in title_lower:
+            tags.append(emoji)
+    
+    tag_line = f"📌 *Tags:* {'  '.join(tags)}" if tags else ""
     
     message = f"""🚀 *New Job Opportunity!*
 💼 *Title:* {clean_title}
