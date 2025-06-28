@@ -100,23 +100,35 @@ def strip_html_tags(text):
     return re.sub(r'<[^>]+>', '', text)
 
 def escape_markdown(text):
+    """
+    Escapes special characters for Telegram MarkdownV2.
+    """
     escape_chars = r'\_*[]()~`>#+-=|{}.!'
     return ''.join('\\' + c if c in escape_chars else c for c in text)
 
 def post_to_telegram(job):
-    clean_title = escape_markdown(strip_html_tags(job['title']))
+    # Clean and escape job title
+    clean_title = strip_html_tags(job['title'])
+    clean_title = escape_markdown(clean_title)
+
+    # Extract and escape domain from link
     domain = urlparse(job['link']).netloc.replace('www.', '')
     source = escape_markdown(domain)
 
+    # Escape the footer and link (yes, link needs escaping too)
+    footer = escape_markdown("✅ Stay tuned for more job updates!")
+    safe_link = escape_markdown(job['link'])
+
+    # Build fancy MarkdownV2-safe message
     message = f"""🚀 *New Job Opportunity!*
 
 💼 *Title:* `{clean_title}`
 🗂️ *Summary:* _Tap below to view full details_
 🌍 *Source:* `{source}`
 
-🔗 [👉 View & Apply Now]({job['link']})
+🔗 [👉 View & Apply Now]({safe_link})
 
-✅ *Stay tuned for more job updates!*
+{footer}
 """
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -134,6 +146,7 @@ def post_to_telegram(job):
             print(f"✅ Posted: {clean_title}")
     except Exception as e:
         print(f"⚠️ Error: {e}")
+
 
 
 
