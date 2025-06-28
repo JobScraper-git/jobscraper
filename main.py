@@ -114,20 +114,21 @@ def strip_html_tags(text):
     return re.sub(r'<[^>]+>', '', text)
 
 def post_to_telegram(job):
-    clean_title = html.escape(strip_html_tags(job['title']))
-    
+    raw_title = strip_html_tags(job['title'])              # 1. Keep raw for tag match
+    clean_title = html.escape(raw_title)                   # 2. Escape for Telegram safety
+
     source_link = job['link'].split('url=')[-1].split('&')[0]
     domain = source_link.split('/')[2].replace('www.', '')
 
     tags = []
-    title_lower = clean_title.lower()
-    
+    title_lower = raw_title.lower()                        # ✅ Match against raw title
+
     for keyword, emoji in KEYWORD_TAGS.items():
         if keyword in title_lower:
             tags.append(emoji)
-    
+
     tag_line = f"📌 *Tags:* {'  '.join(tags)}" if tags else ""
-    
+
     message = f"""🚀 *New Job Opportunity!*
 💼 *Title:* {clean_title}
 🗂️ *Summary:* Tap below to view full details
