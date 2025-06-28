@@ -101,13 +101,14 @@ def strip_html_tags(text):
 
 def post_to_telegram(job):
     clean_title = html.escape(strip_html_tags(job['title']))
+    domain = job['link'].split('/')[2].replace('www.', '')  # Extract domain
 
-    message = f"""📢 *New Job Alert!*
-
-🔹 *Title:* {clean_title}
-📝 *Summary:* _Click below to read more_
-
-🔗 [Read More]({job['link']})
+    message = f"""🚀 *New Job Opportunity!*
+💼 *Title:* {clean_title}
+🗂️ *Summary:* Tap below to view full details
+🌍 *Source:* {domain}
+🔗 👉 [View and Apply Now]({job['link']})
+✅ Stay tuned for more job updates!
 """
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
