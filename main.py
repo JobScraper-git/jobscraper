@@ -99,36 +99,22 @@ def get_google_alerts():
 def strip_html_tags(text):
     return re.sub(r'<[^>]+>', '', text)
 
-def escape_markdown(text):
-    escape_chars = r'\_*[]()~`>#+-=|{}.!'
-    return ''.join('\\' + c if c in escape_chars else c for c in text)
-
 def post_to_telegram(job):
-    clean_title = escape_markdown(strip_html_tags(job['title']))
-    domain = urlparse(job['link']).netloc.replace('www.', '')
-    source = escape_markdown(domain)
-    footer = escape_markdown("✅ Stay tuned for more job updates!")
+    clean_title = html.escape(strip_html_tags(job['title']))
 
-    # Escape the link text and URL
-    link_text = escape_markdown("👉 View and Apply Now")
-    safe_link = escape_markdown(job['link'])
+    message = f"""📢 *New Job Alert!*
 
-    message = f"""🚀 *New Job Opportunity!*
+🔹 *Title:* {clean_title}
+📝 *Summary:* _Click below to read more_
 
-💼 *Title:* `{clean_title}`
-🗂️ *Summary:* _Tap below to view full details_
-🌍 *Source:* `{source}`
-
-🔗 [{link_text}]({safe_link})
-
-{footer}
+🔗 [Read More]({job['link']})
 """
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': TELEGRAM_CHANNEL_ID,
         'text': message,
-        'parse_mode': 'MarkdownV2'
+        'parse_mode': 'Markdown'
     }
 
     try:
