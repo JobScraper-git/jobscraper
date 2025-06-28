@@ -157,11 +157,12 @@ def post_to_telegram(job):
 
 
 def main():
-    real_link = job['link'].split('url=')[-1].split('&')[0]
     posted_links = load_posted_links()
     while True:
         jobs = get_google_alerts()
         for job in jobs:
+            real_link = job['link'].split('url=')[-1].split('&')[0]
+
             if real_link not in posted_links:
                 post_to_telegram(job)
                 posted_links.add(real_link)
@@ -169,6 +170,7 @@ def main():
                 time.sleep(2)
         print("⏳ Sleeping")
         time.sleep(1)
+
 
 
 # Flask app to keep Replit alive
