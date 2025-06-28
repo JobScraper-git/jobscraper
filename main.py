@@ -74,12 +74,42 @@ def get_google_alerts():
     return jobs
 
 
+# def post_to_telegram(job):
+#     text = f"📢 *{job['title']}*\n[Read More]({job['link']})"
+#     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+#     payload = {
+#         'chat_id': TELEGRAM_CHANNEL_ID,
+#         'text': text,
+#         'parse_mode': 'Markdown'
+#     }
+
+#     try:
+#         resp = requests.post(url, data=payload)
+#         if resp.status_code != 200:
+#             print(f"❌ Telegram error: {resp.status_code} - {resp.text}")
+#         else:
+#             print(f"✅ Posted: {job['title']}")
+#     except Exception as e:
+#         print(f"⚠️ Error: {e}")
+
+def strip_html_tags(text):
+    return re.sub(r'<[^>]+>', '', text)
+
 def post_to_telegram(job):
-    text = f"📢 *{job['title']}*\n[Read More]({job['link']})"
+    clean_title = html.escape(strip_html_tags(job['title']))
+
+    message = f"""📢 *New Job Alert!*
+
+🔹 *Title:* {clean_title}
+📝 *Summary:* _Click below to read more_
+
+🔗 [Read More]({job['link']})
+"""
+
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': TELEGRAM_CHANNEL_ID,
-        'text': text,
+        'text': message,
         'parse_mode': 'Markdown'
     }
 
@@ -88,9 +118,10 @@ def post_to_telegram(job):
         if resp.status_code != 200:
             print(f"❌ Telegram error: {resp.status_code} - {resp.text}")
         else:
-            print(f"✅ Posted: {job['title']}")
+            print(f"✅ Posted: {clean_title}")
     except Exception as e:
         print(f"⚠️ Error: {e}")
+
 
 
 def main():
