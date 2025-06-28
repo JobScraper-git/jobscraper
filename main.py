@@ -7,6 +7,7 @@ import feedparser  # pip install feedparser
 
 import html
 import re
+from urllib.parse import urlparse
 
 POSTED_LINKS_FILE = 'posted_links.txt'
 
@@ -98,22 +99,31 @@ def get_google_alerts():
 def strip_html_tags(text):
     return re.sub(r'<[^>]+>', '', text)
 
+def escape_markdown(text):
+    escape_chars = r'\_*[]()~`>#+-=|{}.!'
+    return ''.join('\\' + c if c in escape_chars else c for c in text)
+
 def post_to_telegram(job):
-    clean_title = html.escape(strip_html_tags(job['title']))
+    clean_title = escape_markdown(strip_html_tags(job['title']))
+    domain = urlparse(job['link']).netloc.replace('www.', '')
+    source = escape_markdown(domain)
 
-    message = f"""📢 *New Job Alert!*
+    message = f"""🚀 *New Job Opportunity!*
 
-🔹 *Title:* {clean_title}
-📝 *Summary:* _Click below to read more_
+💼 *Title:* `{clean_title}`
+🗂️ *Summary:* _Tap below to view full details_
+🌍 *Source:* `{source}`
 
-🔗 [Read More]({job['link']})
+🔗 [👉 View & Apply Now]({job['link']})
+
+✅ *Stay tuned for more job updates!*
 """
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': TELEGRAM_CHANNEL_ID,
         'text': message,
-        'parse_mode': 'Markdown'
+        'parse_mode': 'MarkdownV2'
     }
 
     try:
