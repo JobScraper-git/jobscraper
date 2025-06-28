@@ -101,8 +101,10 @@ def strip_html_tags(text):
 
 def post_to_telegram(job):
     clean_title = html.escape(strip_html_tags(job['title']))
-    domain = job['link'].split('/')[2].replace('www.', '')  # Extract domain
-
+    
+    source_link = job['link'].split('url=')[-1].split('&')[0]
+    domain = source_link.split('/')[2].replace('www.', '')
+    
     message = f"""🚀 *New Job Opportunity!*
 💼 *Title:* {clean_title}
 🗂️ *Summary:* Tap below to view full details
