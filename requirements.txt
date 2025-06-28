@@ -4,4 +4,3 @@ feedparser
 flask
 html
 re
-cgi
