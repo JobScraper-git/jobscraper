@@ -5,25 +5,7 @@ import requests
 import time
 import feedparser  # pip install feedparser
 
-import html
-import re
-from urllib.parse import urlparse
-
 POSTED_LINKS_FILE = 'posted_links.txt'
-
-KEYWORD_TAGS = {
-    'python': '🐍 Python',
-    'intern': '🎓 Internship',
-    'remote': '🏡 Remote',
-    'fresher': '🧑‍🎓 Fresher',
-    'software developer': '💻 Developer',
-    'software engineer': '🛠️ Engineer',
-    'full stack': '🧩 Full Stack',
-    'data': '📊 Data',
-    'ai': '🤖 AI',
-    'ml': '🧠 ML',
-    'cloud': '☁️ Cloud'
-}
 
 
 def load_posted_links():
@@ -36,8 +18,6 @@ def load_posted_links():
 def save_posted_link(link):
     with open(POSTED_LINKS_FILE, 'a') as f:
         f.write(link + '\n')
-    print(f"💾 Saved link: {link}")
-
 
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
@@ -94,56 +74,12 @@ def get_google_alerts():
     return jobs
 
 
-# def post_to_telegram(job):
-#     text = f"📢 *{job['title']}*\n[Read More]({job['link']})"
-#     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-#     payload = {
-#         'chat_id': TELEGRAM_CHANNEL_ID,
-#         'text': text,
-#         'parse_mode': 'Markdown'
-#     }
-
-#     try:
-#         resp = requests.post(url, data=payload)
-#         if resp.status_code != 200:
-#             print(f"❌ Telegram error: {resp.status_code} - {resp.text}")
-#         else:
-#             print(f"✅ Posted: {job['title']}")
-#     except Exception as e:
-#         print(f"⚠️ Error: {e}")
-
-def strip_html_tags(text):
-    return re.sub(r'<[^>]+>', '', text)
-
 def post_to_telegram(job):
-    raw_title = strip_html_tags(job['title'])              # 1. Keep raw for tag match
-    clean_title = html.escape(raw_title)                   # 2. Escape for Telegram safety
-
-    source_link = job['link'].split('url=')[-1].split('&')[0]
-    domain = source_link.split('/')[2].replace('www.', '')
-
-    tags = []
-    title_lower = raw_title.lower()                        # ✅ Match against raw title
-
-    for keyword, emoji in KEYWORD_TAGS.items():
-        if keyword in title_lower:
-            tags.append(emoji)
-
-    tag_line = f"📌 *Tags:* {'  '.join(tags)}" if tags else ""
-
-    message = f"""🚀 *New Job Opportunity!*
-💼 *Title:* {clean_title}
-🗂️ *Summary:* Tap below to view full details
-🌍 *Source:* {domain}
-{tag_line}
-🔗 👉 [View and Apply Now]({job['link']})
-✅ Stay tuned for more job updates!
-"""
-
+    text = f"📢 *{job['title']}*\n[Read More]({job['link']})"
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': TELEGRAM_CHANNEL_ID,
-        'text': message,
+        'text': text,
         'parse_mode': 'Markdown'
     }
 
@@ -152,10 +88,9 @@ def post_to_telegram(job):
         if resp.status_code != 200:
             print(f"❌ Telegram error: {resp.status_code} - {resp.text}")
         else:
-            print(f"✅ Posted: {clean_title}")
+            print(f"✅ Posted: {job['title']}")
     except Exception as e:
         print(f"⚠️ Error: {e}")
-
 
 
 def main():
@@ -163,20 +98,13 @@ def main():
     while True:
         jobs = get_google_alerts()
         for job in jobs:
-            if 'url=' in job['link']:
-                real_link = job['link'].split('url=')[-1].split('&')[0]
-            else:
-                real_link = job['link']
-
-
-            if real_link not in posted_links:
+            if job['link'] not in posted_links:
                 post_to_telegram(job)
-                posted_links.add(real_link)
-                save_posted_link(real_link)
+                posted_links.add(job['link'])
+                save_posted_link(job['link'])
                 time.sleep(2)
         print("⏳ Sleeping")
-        time.sleep(1)
-
+        time.sleep(600)
 
 
 # Flask app to keep Replit alive
