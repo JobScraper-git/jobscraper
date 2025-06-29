@@ -104,7 +104,7 @@ def main():
                 save_posted_link(job['link'])
                 time.sleep(2)
         print("⏳ Sleeping")
-        time.sleep(600)
+        time.sleep(1)
 
 
 # Flask app to keep Replit alive
@@ -129,3 +129,14 @@ def keep_alive():
 if __name__ == "__main__":
     keep_alive()
     main()
+
+
+📢 Major Police Reshuffle: <b>Pune</b>, Pimpri-Chinchwad Get New DCPs - The Bridge Chronicle
+Read More
+
+
+This is my telegram bot's code which posts from rss feed 
+
+I dont want the tags to show in messages as the above one having <b>Bold</b> tag attached in a message.
+
+Can we remove it from not getting into the posted messages?
