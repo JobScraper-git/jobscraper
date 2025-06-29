@@ -3,7 +3,7 @@ from threading import Thread
 import os
 import requests
 import time
-import feedparser  # pip install feedparser
+import feedparser  
 
 POSTED_LINKS_FILE = 'posted_links.txt'
 
@@ -24,22 +24,6 @@ def save_posted_link(link):
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 TELEGRAM_CHANNEL_ID = '@pythonjobss'
-# GOOGLE_ALERT_RSS_LIST = [
-#     'https://www.google.com/alerts/feeds/00162670221367133570/3582827356212725062',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/12668502865782775102',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/7974111972648286337',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/17831604783258834712',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/3974079240828377224',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/6357045272730944519',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/270535950260598864',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/739455206598212500',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/17174574135221950586',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/4758562162378622981',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/39049550568899184',
-#     'https://www.google.com/alerts/feeds/00162670221367133570/48433340344712748'
-# ]
-# Replace with your alert RSS
-
 RSS_FEEDS_FILE = 'rss_feeds.txt'
 
 
@@ -133,13 +117,3 @@ if __name__ == "__main__":
     keep_alive()
     main()
 
-
-📢 Major Police Reshuffle: <b>Pune</b>, Pimpri-Chinchwad Get New DCPs - The Bridge Chronicle
-Read More
-
-
-This is my telegram bot's code which posts from rss feed 
-
-I dont want the tags to show in messages as the above one having <b>Bold</b> tag attached in a message.
-
-Can we remove it from not getting into the posted messages?
