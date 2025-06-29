@@ -7,6 +7,8 @@ import feedparser  # pip install feedparser
 
 POSTED_LINKS_FILE = 'posted_links.txt'
 
+def strip_html_tags(text):
+    return re.sub(r'<[^>]+>', '', text)
 
 def load_posted_links():
     if not os.path.exists(POSTED_LINKS_FILE):
@@ -75,7 +77,8 @@ def get_google_alerts():
 
 
 def post_to_telegram(job):
-    text = f"📢 *{job['title']}*\n[Read More]({job['link']})"
+    clean_title = strip_html_tags(job['title'])
+    text = f"📢 *{clean_title}*\n[Read More]({job['link']})"
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': TELEGRAM_CHANNEL_ID,
