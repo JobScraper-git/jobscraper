@@ -10,6 +10,10 @@ POSTED_LINKS_FILE = 'posted_links.txt'
 def strip_html_tags(text):
     return re.sub(r'<[^>]+>', '', text)
 
+def escape_markdown(text):
+    escape_chars = r'\_*[]()~`>#+-=|{}.!'
+    return ''.join('\\' + c if c in escape_chars else c for c in text)
+
 def load_posted_links():
     if not os.path.exists(POSTED_LINKS_FILE):
         return set()
@@ -61,13 +65,24 @@ def get_google_alerts():
 
 
 def post_to_telegram(job):
-    clean_title = strip_html_tags(job['title'])
-    text = f"📢 *{clean_title}*\n[Read More]({job['link']})"
+    source_link = job['link'].split('url=')[-1].split('&')[0]
+    domain = source_link.split('/')[2].replace('www.', '')
+    real_link = source_link
+    
+    message = f"""🚀 *New Job Opportunity!*
+    💼 *Title:* {clean_title}
+    🗂️ *Summary:* Tap below to view full details
+    🌍 *Source:* {domain}
+    🔗 👉 [View and Apply Now]({real_link})
+    ✅ Stay tuned for more job updates!
+    """
+
+
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': TELEGRAM_CHANNEL_ID,
-        'text': text,
-        'parse_mode': 'Markdown'
+        'text': message,
+        'parse_mode': 'MarkdownV2'
     }
 
     try:
@@ -75,7 +90,7 @@ def post_to_telegram(job):
         if resp.status_code != 200:
             print(f"❌ Telegram error: {resp.status_code} - {resp.text}")
         else:
-            print(f"✅ Posted: {job['title']}")
+            print(f"✅ Posted: {clean_title}")
     except Exception as e:
         print(f"⚠️ Error: {e}")
 
