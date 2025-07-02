@@ -2,11 +2,20 @@ import os
 import time
 import requests
 import feedparser
+import re
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 TELEGRAM_CHANNEL_ID = '@pythonjobss'
 RSS_FEEDS_FILE = 'rss_feeds.txt'
 POSTED_LINKS_FILE = 'posted_links.txt'
+
+def strip_html_tags(text):
+    return re.sub(r'<[^>]+>', '', text)
+
+def clean_google_link(link):
+    if 'url=' in link:
+        return link.split('url=')[1].split('&')[0]
+    return link
 
 def load_posted_links():
     if not os.path.exists(POSTED_LINKS_FILE):
@@ -29,7 +38,9 @@ def fetch_jobs():
     for url in load_rss_feeds():
         feed = feedparser.parse(url)
         for entry in feed.entries:
-            jobs.append({'title': entry.title, 'link': entry.link})
+            title = strip_html_tags(entry.title)
+            link = clean_google_link(entry.link)
+            jobs.append({'title': title, 'link': link})
     return jobs
 
 def post_to_telegram(job):
