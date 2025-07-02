@@ -72,6 +72,12 @@ def main():
                 time.sleep(2)
         print("⏳ Waiting before next check...")
         time.sleep(1)
+print(f"✅ Posted {new_count} new jobs.")
+
+sleep_seconds = 60  # ⏲️ Adjust sleep duration here
+print(f"😴 Sleeping for {sleep_seconds} seconds...\n")
+time.sleep(sleep_seconds)
+
 
 app = Flask('')
 
