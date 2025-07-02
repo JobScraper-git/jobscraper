@@ -45,6 +45,27 @@ def fetch_jobs():
             jobs.append({'title': title, 'link': link})
     return jobs
 
+def get_google_alerts():
+    print("🔍 Fetching from multiple Google Alert RSS feeds...")
+    jobs = []
+    rss_urls = load_rss_feed_urls()
+
+    for rss_url in rss_urls:
+        print(f"📡 Fetching: {rss_url}")
+        feed = feedparser.parse(rss_url)
+        for entry in feed.entries:
+            jobs.append({
+                'title':
+                entry.title,
+                'link':
+                entry.link,
+                'summary':
+                entry.summary if hasattr(entry, 'summary') else ''
+            })
+
+    print(f"✅ Total job alerts collected: {len(jobs)}")
+    return jobs
+
 def post_to_telegram(job):
     message = f"{job['title']}\n{job['link']}"
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
