@@ -64,6 +64,10 @@ def post_to_telegram(job):
 def main():
     posted_links = load_posted_links()
     while True:
+        print("🔍 Checking for new jobs...")
+        jobs = get_google_alerts()
+        new_count = 0
+
         for job in fetch_jobs():
             if job['link'] not in posted_links:
                 post_to_telegram(job)
