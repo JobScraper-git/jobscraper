@@ -66,9 +66,10 @@ def get_google_alerts():
 
 def post_to_telegram(job):
     source_link = job['link'].split('url=')[-1].split('&')[0]
-    clean_title = escape_markdown(strip_html_tags(job['title']))
     domain = source_link.split('/')[2].replace('www.', '')
     real_link = source_link
+    
+    clean_title = escape_markdown(strip_html_tags(job['title']))
     
     message = f"""🚀 *New Job Opportunity!*
     💼 *Title:* {clean_title}
