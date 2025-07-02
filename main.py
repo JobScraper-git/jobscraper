@@ -39,7 +39,10 @@ def fetch_jobs():
     return jobs
 
 def post_to_telegram(job):
-    message = f"{job['title']}\n{job['link']}"
+    clean_title = strip_html_tags(job['title'])
+    link = job['link'].split('url=')[-1].split('&')[0]
+    message = f"{clean_title}\n{link}"
+
     resp = requests.post(
         f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
         data={'chat_id': TELEGRAM_CHANNEL_ID, 'text': message}
