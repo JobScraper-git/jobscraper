@@ -11,6 +11,10 @@ TELEGRAM_CHANNEL_ID = '@pythonjobss'
 RSS_FEEDS_FILE = 'rss_feeds.txt'
 POSTED_LINKS_FILE = 'posted_links.txt'
 
+def strip_html_tags(text):
+    # removes anything between <...>
+    return re.sub(r'<[^>]+>', '', text)
+
 def load_posted_links():
     if not os.path.exists(POSTED_LINKS_FILE):
         return set()
