@@ -5,6 +5,7 @@ import requests
 import time
 import feedparser  
 import re 
+import html
 
 POSTED_LINKS_FILE = 'posted_links.txt'
 
