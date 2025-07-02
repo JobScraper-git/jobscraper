@@ -11,10 +11,6 @@ POSTED_LINKS_FILE = 'posted_links.txt'
 def strip_html_tags(text):
     return re.sub(r'<[^>]+>', '', text)
 
-def escape_markdown(text):
-    escape_chars = r'\_*[]()~`>#+-=|{}.!'
-    return ''.join('\\' + c if c in escape_chars else c for c in text)
-
 def load_posted_links():
     if not os.path.exists(POSTED_LINKS_FILE):
         return set()
@@ -66,22 +62,21 @@ def get_google_alerts():
 
 
 def post_to_telegram(job):
+    raw_title = strip_html_tags(job['title'])              # 1. Keep raw for tag match
+    clean_title = html.escape(raw_title)                   # 2. Escape for Telegram safety
+
     source_link = job['link'].split('url=')[-1].split('&')[0]
     domain = source_link.split('/')[2].replace('www.', '')
+
     real_link = source_link
 
-    clean_title = escape_markdown(strip_html_tags(job['title']))
-    domain = escape_markdown(domain)
-    real_link = escape_markdown(real_link)
-
-    message = (
-        "🚀 *New Job Opportunity!*\n"
-        f"💼 *Title:* {clean_title}\n"
-        "🗂️ *Summary:* Tap below to view full details\n"
-        f"🌍 *Source:* {domain}\n"
-        f"🔗 👉 [View and Apply Now]({real_link})\n"
-        "✅ Stay tuned for more job updates!"
-    )
+    message = f"""🚀 *New Job Opportunity!*
+💼 *Title:* {clean_title}
+🗂️ *Summary:* Tap below to view full details
+🌍 *Source:* {domain}
+🔗 👉 [View and Apply Now]({real_link})
+✅ Stay tuned for more job updates
+"""
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
