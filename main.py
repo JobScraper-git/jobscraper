@@ -61,15 +61,24 @@ def main():
     while True:
         new_count = 0
         for job in fetch_jobs():
-            if job['link'] not in posted:
+            # ▶️ 1. Clean the Google redirect URL to get the real job link
+            clean_link = job['link'].split('url=')[-1].split('&')[0]
+
+            # ▶️ 2. Only post if we haven’t seen this clean_link before
+            if clean_link not in posted:
+                # your existing post logic
                 post_to_telegram(job)
-                save_posted_link(job['link'])
-                posted.add(job['link'])
+
+                # ▶️ 3. Save & remember the clean link, not the raw one
+                save_posted_link(clean_link)
+                posted.add(clean_link)
+
                 new_count += 1
                 time.sleep(2)
-        
+
         print(f"✅ Posted {new_count} new jobs.")
-        time.sleep(1)
+        time.sleep(60)
+
 
 app = Flask('')
 
