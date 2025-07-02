@@ -68,20 +68,19 @@ def main():
         jobs = get_google_alerts()
         new_count = 0
 
-        for job in fetch_jobs():
+        for job in jobs:
             if job['link'] not in posted_links:
                 post_to_telegram(job)
-                save_posted_link(job['link'])
                 posted_links.add(job['link'])
-                time.sleep(2)
-        print("⏳ Waiting before next check...")
-        time.sleep(1)
-print(f"✅ Posted {new_count} new jobs.")
+                save_posted_link(job['link'])
+                new_count += 1
+                time.sleep(2)  # Wait between posts to avoid spamming
 
-sleep_seconds = 60  # ⏲️ Adjust sleep duration here
-print(f"😴 Sleeping for {sleep_seconds} seconds...\n")
-time.sleep(sleep_seconds)
-
+        print(f"✅ Posted {new_count} new jobs.")
+        
+        sleep_seconds = 60  # ⏲️ Adjust sleep duration here
+        print(f"😴 Sleeping for {sleep_seconds} seconds...\n")
+        time.sleep(sleep_seconds)
 
 app = Flask('')
 
