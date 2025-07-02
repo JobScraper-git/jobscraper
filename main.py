@@ -1,3 +1,5 @@
+from flask import Flask
+from threading import Thread
 import os
 import time
 import requests
@@ -69,7 +71,21 @@ def main():
                 posted_links.add(job['link'])
                 time.sleep(2)
         print("⏳ Waiting before next check...")
-        time.sleep(60)
+        time.sleep(1)
+
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "✅ Telegram Job Bot is running!"
+
+def run_web():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run_web)
+    t.start()
 
 if __name__ == "__main__":
+    keep_alive()
     main()
