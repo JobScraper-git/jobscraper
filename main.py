@@ -3,83 +3,57 @@ from threading import Thread
 import os
 import requests
 import time
-import feedparser  
-import re 
-import html
+import feedparser
+import re
 
 POSTED_LINKS_FILE = 'posted_links.txt'
-
-def strip_html_tags(text):
-    return re.sub(r'<[^>]+>', '', text)
+RSS_FEEDS_FILE = 'rss_feeds.txt'
+TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
+TELEGRAM_CHANNEL_ID = '@pythonjobss'
 
 def load_posted_links():
-    if not os.path.exists(POSTED_LINKS_FILE):
-        return set()
-    with open(POSTED_LINKS_FILE, 'r') as f:
-        return set(line.strip() for line in f if line.strip())
-
+    return set(open(POSTED_LINKS_FILE).read().splitlines()) if os.path.exists(POSTED_LINKS_FILE) else set()
 
 def save_posted_link(link):
     with open(POSTED_LINKS_FILE, 'a') as f:
         f.write(link + '\n')
 
-
-TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-TELEGRAM_CHANNEL_ID = '@pythonjobss'
-RSS_FEEDS_FILE = 'rss_feeds.txt'
-
-
 def load_rss_feed_urls():
     if not os.path.exists(RSS_FEEDS_FILE):
         print("⚠️ rss_feeds.txt not found.")
         return []
-    with open(RSS_FEEDS_FILE, 'r') as f:
-        return [
-            line.strip() for line in f
-            if line.strip() and not line.strip().startswith('#')
-        ]
-
+    return [line.strip() for line in open(RSS_FEEDS_FILE) if line.strip() and not line.startswith('#')]
 
 def get_google_alerts():
-    print("🔍 Fetching from multiple Google Alert RSS feeds...")
     jobs = []
-    rss_urls = load_rss_feed_urls()
-
-    for rss_url in rss_urls:
-        print(f"📡 Fetching: {rss_url}")
+    for rss_url in load_rss_feed_urls():
         feed = feedparser.parse(rss_url)
         for entry in feed.entries:
             jobs.append({
-                'title':
-                entry.title,
-                'link':
-                entry.link,
-                'summary':
-                entry.summary if hasattr(entry, 'summary') else ''
+                'title': entry.title,
+                'link': entry.link,
+                'summary': getattr(entry, 'summary', '')
             })
-
     print(f"✅ Total job alerts collected: {len(jobs)}")
     return jobs
 
+def escape_markdown(text):
+    escape_chars = r'\_*[]()~`>#+-=|{}.!'
+    return ''.join('\\' + c if c in escape_chars else c for c in text)
 
 def post_to_telegram(job):
-    raw_title = strip_html_tags(job['title'])              # 1. Keep raw for tag match
-    clean_title = html.escape(raw_title)                   # 2. Escape for Telegram safety
-
     source_link = job['link'].split('url=')[-1].split('&')[0]
     domain = source_link.split('/')[2].replace('www.', '')
-
-    real_link = source_link
+    clean_title = escape_markdown(job['title'])
 
     message = f"""🚀 *New Job Opportunity!*
 💼 *Title:* {clean_title}
 🗂️ *Summary:* Tap below to view full details
-🌍 *Source:* {domain}
-🔗 👉 [View and Apply Now]({real_link})
+🌍 *Source:* {escape_markdown(domain)}
+🔗 👉 [View and Apply Now]({escape_markdown(source_link)})
 ✅ Stay tuned for more job updates
 """
 
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         'chat_id': TELEGRAM_CHANNEL_ID,
         'text': message,
@@ -87,50 +61,39 @@ def post_to_telegram(job):
     }
 
     try:
-        resp = requests.post(url, data=payload)
-        if resp.status_code != 200:
-            print(f"❌ Telegram error: {resp.status_code} - {resp.text}")
-        else:
+        resp = requests.post(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage", data=payload)
+        if resp.status_code == 200:
             print(f"✅ Posted: {clean_title}")
+        else:
+            print(f"❌ Telegram error: {resp.status_code} - {resp.text}")
     except Exception as e:
         print(f"⚠️ Error: {e}")
-
-
 
 def main():
     posted_links = load_posted_links()
     while True:
-        jobs = get_google_alerts()
-        for job in jobs:
+        for job in get_google_alerts():
             if job['link'] not in posted_links:
                 post_to_telegram(job)
-                posted_links.add(job['link'])
                 save_posted_link(job['link'])
+                posted_links.add(job['link'])
                 time.sleep(2)
         print("⏳ Sleeping")
         time.sleep(1)
 
-
-# Flask app to keep Replit alive
+# Flask app for keep-alive
 app = Flask('')
-
 
 @app.route('/')
 def home():
     return "✅ Telegram Job Bot is running!"
 
-
 def run_web():
     app.run(host='0.0.0.0', port=8080)
 
-
 def keep_alive():
-    t = Thread(target=run_web)
-    t.start()
+    Thread(target=run_web).start()
 
-
-# Start keep-alive server + main loop
 if __name__ == "__main__":
     keep_alive()
     main()
-
